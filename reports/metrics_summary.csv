@@ -1,0 +1,4 @@
+Model,Accuracy,Precision,Recall (Sensitivity),F1-Score,ROC-AUC,Gini Coefficient,KS Statistic
+Gradient Boosting,0.682,0.2381,0.4902,0.3205,0.6507,0.3014,0.2292
+Logistic Regression,0.657,0.2589,0.6667,0.3729,0.7218,0.4437,0.3352
+Random Forest,0.801,0.2909,0.2092,0.2433,0.6376,0.2752,0.2324

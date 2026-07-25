@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Credit Risk Scoring System - AI Assessment Engine</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #0f172a;
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --border-color: rgba(255, 255, 255, 0.1);
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --accent-blue: #38bdf8;
+            --accent-purple: #818cf8;
+            --success: #34d399;
+            --warning: #fbbf24;
+            --danger: #f87171;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-primary);
+            min-height: 100vh;
+            padding: 2rem;
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(56, 189, 248, 0.15) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(129, 140, 248, 0.15) 0px, transparent 50%);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            margin-bottom: 2.5rem;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 2.2rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #38bdf8, #818cf8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.5rem;
+        }
+
+        header p {
+            color: var(--text-secondary);
+            font-size: 1rem;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+
+        @media (max-width: 900px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card {
+            background: var(--card-bg);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--border-color);
+            border-radius: 1rem;
+            padding: 2rem;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 1rem;
+        }
+
+        .card-header h2 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+        }
+
+        .input-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid var(--border-color);
+            border-radius: 0.5rem;
+            color: var(--text-primary);
+            font-size: 0.95rem;
+            transition: border-color 0.2s;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--accent-blue);
+        }
+
+        .btn-submit {
+            width: 100%;
+            padding: 0.9rem;
+            margin-top: 1rem;
+            background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+            color: #fff;
+            border: none;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.1s, opacity 0.2s;
+        }
+
+        .btn-submit:hover {
+            opacity: 0.95;
+            transform: translateY(-1px);
+        }
+
+        /* Result Panel */
+        .score-circle-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem 0;
+        }
+
+        .score-circle {
+            width: 180px;
+            height: 180px;
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border: 6px solid var(--accent-blue);
+            background: rgba(15, 23, 42, 0.8);
+            box-shadow: 0 0 30px rgba(56, 189, 248, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .score-value {
+            font-size: 2.8rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .score-label {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .decision-badge {
+            margin-top: 1.5rem;
+            padding: 0.6rem 1.5rem;
+            border-radius: 2rem;
+            font-weight: 700;
+            font-size: 1rem;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        .badge-approved { background: rgba(52, 211, 153, 0.15); color: var(--success); border: 1px solid var(--success); }
+        .badge-review { background: rgba(251, 191, 36, 0.15); color: var(--warning); border: 1px solid var(--warning); }
+        .badge-declined { background: rgba(248, 113, 113, 0.15); color: var(--danger); border: 1px solid var(--danger); }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .metric-box {
+            background: rgba(15, 23, 42, 0.5);
+            padding: 1rem;
+            border-radius: 0.5rem;
+            border: 1px solid var(--border-color);
+            text-align: center;
+        }
+
+        .metric-box p {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        .metric-box h3 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-top: 0.25rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Credit Risk Scoring System</h1>
+            <p>Production ML Engine for Instant Credit Risk Assessment</p>
+        </header>
+
+        <div class="dashboard-grid">
+            <!-- Form Card -->
+            <div class="card">
+                <div class="card-header">
+                    <h2>Applicant Information</h2>
+                    <select id="model_select" style="width: 200px;">
+                        <option value="logistic_regression">Logistic Regression</option>
+                        <option value="random_forest">Random Forest</option>
+                        <option value="gradient_boosting">Gradient Boosting</option>
+                    </select>
+                </div>
+
+                <form id="credit_form">
+                    <div class="input-row">
+                        <div class="form-group">
+                            <label>Age (years)</label>
+                            <input type="number" id="age" value="35" min="18" max="100" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Employment (years)</label>
+                            <input type="number" id="employment_years" value="6.5" step="0.1" min="0" required>
+                        </div>
+                    </div>
+
+                    <div class="input-row">
+                        <div class="form-group">
+                            <label>Annual Income ($)</label>
+                            <input type="number" id="annual_income" value="65000" step="500" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Credit Limit ($)</label>
+                            <input type="number" id="credit_limit" value="20000" step="500" required>
+                        </div>
+                    </div>
+
+                    <div class="input-row">
+                        <div class="form-group">
+                            <label>Current Balance ($)</label>
+                            <input type="number" id="current_balance" value="3500" step="100" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Total Debt ($)</label>
+                            <input type="number" id="total_debt" value="45000" step="500" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Late Payments in Last 12 Months</label>
+                        <input type="number" id="num_late_payments_12m" value="0" min="0" max="15" required>
+                    </div>
+
+                    <button type="submit" class="btn-submit">Assess Credit Risk Score</button>
+                </form>
+            </div>
+
+            <!-- Results Card -->
+            <div class="card" id="results_card">
+                <div class="card-header">
+                    <h2>Credit Score & Decision</h2>
+                    <span id="selected_model_badge" style="font-size: 0.85rem; color: var(--accent-blue);">Model: Logistic Regression</span>
+                </div>
+
+                <div class="score-circle-container">
+                    <div class="score-circle" id="score_border">
+                        <div class="score-value" id="score_text">742</div>
+                        <div class="score-label">FICO Scale</div>
+                    </div>
+                    <div class="decision-badge badge-approved" id="decision_badge">APPROVED</div>
+                </div>
+
+                <div class="metrics-grid">
+                    <div class="metric-box">
+                        <p>Probability of Default</p>
+                        <h3 id="prob_text">4.2%</h3>
+                    </div>
+                    <div class="metric-box">
+                        <p>Risk Classification</p>
+                        <h3 id="risk_text">Low Risk</h3>
+                    </div>
+                    <div class="metric-box">
+                        <p>Credit Utilization</p>
+                        <h3 id="util_text">17.5%</h3>
+                    </div>
+                    <div class="metric-box">
+                        <p>Debt-to-Income (DTI)</p>
+                        <h3 id="dti_text">69.2%</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('credit_form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const data = {
+                model_name: document.getElementById('model_select').value,
+                age: parseFloat(document.getElementById('age').value),
+                employment_years: parseFloat(document.getElementById('employment_years').value),
+                annual_income: parseFloat(document.getElementById('annual_income').value),
+                credit_limit: parseFloat(document.getElementById('credit_limit').value),
+                current_balance: parseFloat(document.getElementById('current_balance').value),
+                total_debt: parseFloat(document.getElementById('total_debt').value),
+                num_late_payments_12m: parseInt(document.getElementById('num_late_payments_12m').value)
+            };
+
+            try {
+                const response = await fetch('/predict', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                const res = await response.json();
+
+                // Update UI
+                document.getElementById('score_text').innerText = res.credit_score;
+                document.getElementById('prob_text').innerText = (res.probability_default * 100).toFixed(1) + '%';
+                document.getElementById('risk_text').innerText = res.risk_band;
+                document.getElementById('util_text').innerText = (res.revol_utilization * 100).toFixed(1) + '%';
+                document.getElementById('dti_text').innerText = (res.dti_ratio * 100).toFixed(1) + '%';
+
+                const badge = document.getElementById('decision_badge');
+                const scoreCircle = document.getElementById('score_border');
+
+                badge.className = 'decision-badge ';
+                if (res.decision === 'APPROVED') {
+                    badge.classList.add('badge-approved');
+                    badge.innerText = 'APPROVED (LOW RISK)';
+                    scoreCircle.style.borderColor = 'var(--success)';
+                } else if (res.decision === 'MANUAL REVIEW') {
+                    badge.classList.add('badge-review');
+                    badge.innerText = 'MANUAL REVIEW';
+                    scoreCircle.style.borderColor = 'var(--warning)';
+                } else {
+                    badge.classList.add('badge-declined');
+                    badge.innerText = 'DECLINED (HIGH RISK)';
+                    scoreCircle.style.borderColor = 'var(--danger)';
+                }
+
+                document.getElementById('selected_model_badge').innerText = 'Model: ' + res.model_used;
+            } catch (err) {
+                alert('Error running risk prediction: ' + err);
+            }
+        });
+    </script>
+</body>
+</html>
