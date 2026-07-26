@@ -3,6 +3,7 @@ import joblib
 import pandas as pd
 import numpy as np
 from flask import Flask, render_template, request, jsonify
+from flask_cors import CORS
 from dotenv import load_dotenv
 
 # Load environment variables
@@ -12,6 +13,8 @@ load_dotenv()
 import database
 
 app = Flask(__name__)
+CORS(app)  # Enable Cross-Origin Resource Sharing for separate frontend/backend deployment
+
 
 # Load preprocessor artifact
 PREPROCESSOR_PATH = os.path.join("models", "preprocessor.joblib")
