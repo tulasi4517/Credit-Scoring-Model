@@ -3,6 +3,13 @@ import joblib
 import pandas as pd
 import numpy as np
 from flask import Flask, render_template, request, jsonify
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
+
+# Import Database Layer for MongoDB Atlas
+import database
 
 app = Flask(__name__)
 
@@ -73,8 +80,10 @@ def predict():
             scaled_input = engineered
             
         # Model Selection
-        model = models.get(selected_model_name, list(models.values())[0])
-        
+        model = models.get(selected_model_name, list(models.values())[0] if models else None)
+        if model is None:
+            return jsonify({'error': 'No trained machine learning models found in models/ directory.'}), 500
+            
         # Predict Default Probability
         prob_default = float(model.predict_proba(scaled_input)[0, 1])
         
@@ -95,23 +104,74 @@ def predict():
             
         revol_util = float(engineered['revol_utilization'].iloc[0])
         dti_ratio = float(engineered['dti_ratio'].iloc[0])
+        model_display = selected_model_name.replace("_", " ").title()
         
-        return jsonify({
+        result_payload = {
             'credit_score': credit_score,
             'probability_default': round(prob_default, 4),
             'risk_band': risk_band,
             'decision': decision,
             'revol_utilization': round(revol_util, 4),
             'dti_ratio': round(dti_ratio, 4),
-            'model_used': selected_model_name.replace("_", " ").title()
-        })
+            'model_used': model_display,
+            'applicant_inputs': {
+                'age': float(data['age']),
+                'employment_years': float(data['employment_years']),
+                'annual_income': float(data['annual_income']),
+                'credit_limit': float(data['credit_limit']),
+                'current_balance': float(data['current_balance']),
+                'total_debt': float(data['total_debt']),
+                'num_late_payments_12m': int(data['num_late_payments_12m'])
+            }
+        }
+        
+        # Persist Assessment Record to MongoDB Atlas / Database Layer
+        db_record = database.save_assessment(result_payload)
+        result_payload['record_id'] = db_record.get('_id')
+        result_payload['saved_to_db'] = True
+        
+        return jsonify(result_payload)
 
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+@app.route('/api/assessments', methods=['GET'])
+def get_assessments():
+    """Fetch historical credit assessments saved in MongoDB Atlas."""
+    try:
+        limit = int(request.args.get('limit', 50))
+        risk_filter = request.args.get('risk_band', None)
+        records = database.get_assessments(limit=limit, risk_filter=risk_filter)
+        return jsonify({'success': True, 'count': len(records), 'assessments': records})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@app.route('/api/assessments/<record_id>', methods=['DELETE'])
+def delete_assessment(record_id):
+    """Delete a credit assessment from MongoDB Atlas."""
+    try:
+        success = database.delete_assessment(record_id)
+        return jsonify({'success': success, 'message': 'Record deleted successfully' if success else 'Record not found'})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@app.route('/api/db-status', methods=['GET'])
+def db_status():
+    """Returns database connection status and MongoDB Atlas stats."""
+    status_info = database.get_db_status()
+    return jsonify(status_info)
+
+@app.route('/api/db-reconnect', methods=['POST'])
+def db_reconnect():
+    """Forces reconnection to MongoDB Atlas."""
+    connected = database.init_db()
+    status_info = database.get_db_status()
+    return jsonify({'success': connected, 'status': status_info})
+
 if __name__ == '__main__':
-    print("=" * 65)
-    print("  Credit Scoring Application Server Running on http://127.0.0.1:5000")
-    print("=" * 65)
-    # Disable debug mode and reloader to prevent Windows subprocess crashes
-    app.run(host='127.0.0.1', port=5000, debug=False, use_reloader=False)
+    port = int(os.getenv("PORT", 5000))
+    print("=" * 68)
+    print(f"  Full-Stack Credit Scoring Server Running on http://127.0.0.1:{port}")
+    print("  Database: MongoDB Atlas / PyMongo Engine")
+    print("=" * 68)
+    app.run(host='127.0.0.1', port=port, debug=False, use_reloader=False)

@@ -1,83 +1,95 @@
-# 💳 Credit Scoring Model - Machine Learning System
+# 💳 Full-Stack Credit Scoring & Risk Assessment System (MongoDB Atlas Integration)
 
-An end-to-end Machine Learning Credit Risk Assessment Pipeline built with Python, scikit-learn, and Flask. This project generates synthetic credit applicant data, performs feature engineering, trains interpretable and ensemble classification models, evaluates credit domain metrics (ROC-AUC, Gini Coefficient, KS Statistic), and provides an interactive web dashboard for real-time credit score generation (300-850 FICO scale).
+A production-ready **Full-Stack Machine Learning Application** built with **Flask**, **MongoDB Atlas Cloud Database**, **scikit-learn**, and a modern **Glassmorphic Frontend Dashboard**.
+
+This system calculates real-time credit scores (300–850 FICO scale), determines automated loan decisions (**APPROVED**, **MANUAL REVIEW**, **DECLINED**), and automatically persists applicant records and risk evaluation analytics to **MongoDB Atlas**.
 
 ---
 
-## 🌟 Key Features
+## 🏗️ Full-Stack Architecture
 
-- **Synthetic Data Engine**: Generates 5,000 realistic credit applicant profiles with ~5% missing values (MCAR) for preprocessing benchmarking.
-- **Domain Feature Engineering**: Computes Revolving Credit Utilization, Debt-to-Income (DTI) ratio, Debt-to-Limit ratio, and Income per Employment Year.
-- **Imbalance-Aware Model Suite**:
-  - **Logistic Regression**: Interpretable banking industry baseline.
-  - **Random Forest Classifier**: Non-linear ensemble model.
-  - **Gradient Boosting**: High-performance decision tree booster.
-- **Credit Domain Evaluation**:
-  - Standard Metrics: Accuracy, Precision, Recall, F1-Score, Confusion Matrices.
-  - Banking Metrics: **ROC-AUC (0.7218)**, **Gini Coefficient (0.4437)**, **KS Statistic (0.3352)**.
-- **Interactive Web App**: Modern Flask web interface allowing users to input financial parameters and receive instant credit risk scoring and automated loan decisioning (**Approved**, **Manual Review**, **Declined**).
+- **Frontend**: HTML5, CSS3 Glassmorphism, JavaScript, live MongoDB connection diagnostics, tabbed assessment dashboard, and cloud history viewer.
+- **Backend**: Flask REST API providing prediction endpoints, model inference, and MongoDB database management.
+- **Database**: **MongoDB Atlas Cloud Database** (via `pymongo` and `dnspython`) with automated fallback to local/in-memory store.
+- **Machine Learning**: Logistic Regression, Random Forest, and Gradient Boosting models trained on domain features (Revolving Credit Utilization, DTI, Income/Debt ratios).
 
 ---
 
 ## 📁 Repository Structure
 
 ```text
-├── 01_dataset_loader.py         # Synthetic data generation engine
-├── 02_preprocessing.py          # Imputation, feature engineering & scaling
-├── 03_model_training.py          # Model training with class imbalance handling
-├── 04_model_evaluation.py        # ROC-AUC, Gini, KS-Statistic & plot generation
-├── 05_model_explainability.py    # Log-Odds coefficients & feature importance ranking
-├── app.py                       # Flask web application backend
+├── .env.example                 # Environment configuration template for MongoDB Atlas
+├── .env                         # Local environment variables (MongoDB Atlas URI, Port)
+├── requirements.txt             # Python dependencies (Flask, PyMongo, dnspython, etc.)
+├── database.py                  # MongoDB Atlas database client, CRUD helper functions & status check
+├── app.py                       # Full-stack Flask REST API server
 ├── templates/
-│   └── index.html               # Web application UI dashboard
-├── data/                        # Raw & preprocessed CSV datasets
-├── models/                      # Trained model artifacts & preprocessor pipeline
-└── reports/                     # Evaluation metrics summary & high-res plots
+│   └── index.html               # Glassmorphic Frontend Dashboard (Assessment Engine & Atlas History)
+├── 01_dataset_loader.py         # Synthetic dataset generator
+├── 02_preprocessing.py          # Data imputation & feature engineering
+├── 03_model_training.py          # ML model training pipeline
+├── 04_model_evaluation.py        # ROC-AUC, Gini, KS-Statistic evaluation
+├── 05_model_explainability.py    # Log-Odds & feature importance analysis
+├── data/                        # CSV datasets
+├── models/                      # Trained model artifacts (`.joblib`)
+└── reports/                     # Model evaluation reports & charts
 ```
 
 ---
 
-## 📊 Model Performance Summary
+## 🍃 MongoDB Atlas Setup & Configuration
 
-| Model | Accuracy | Precision | Recall (Sensitivity) | F1-Score | **ROC-AUC** | **Gini Coefficient** | **KS Statistic** |
+1. Create a free **MongoDB Atlas** cluster at [mongodb.com/cloud/atlas](https://www.mongodb.com/cloud/atlas).
+2. Obtain your **MongoDB Atlas Connection String** (e.g. `mongodb+srv://<username>:<password>@cluster0.xxx.mongodb.net/credit_scoring_db?retryWrites=true&w=majority`).
+3. Open or create `.env` in the root directory and set your `MONGO_URI`:
+
+```env
+MONGO_URI=mongodb+srv://<username>:<password>@cluster0.xxx.mongodb.net/credit_scoring_db?retryWrites=true&w=majority
+DB_NAME=credit_scoring_db
+COLLECTION_NAME=credit_assessments
+PORT=5000
+```
+
+> **Note**: If `MONGO_URI` is not set or network connection is unavailable, the application automatically uses safe fallback mode so the application runs seamlessly in all environments while clearly displaying connectivity status on the UI.
+
+---
+
+## 🚀 Quick Start Guide
+
+### 1. Install Dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+### 2. Run the Full-Stack Server
+
+```bash
+python app.py
+```
+
+### 3. Open Dashboard
+
+Navigate to **`http://127.0.0.1:5000`** in your browser.
+
+---
+
+## 🔌 REST API Endpoints
+
+| Method | Endpoint | Description |
+| :--- | :--- | :--- |
+| `POST` | `/predict` | Evaluates credit risk input, computes FICO score, and saves record to MongoDB Atlas. |
+| `GET` | `/api/assessments` | Retrieves stored credit assessments from MongoDB Atlas (with optional `risk_band` query filter). |
+| `DELETE` | `/api/assessments/<id>` | Deletes a specific assessment record from MongoDB Atlas. |
+| `GET` | `/api/db-status` | Returns MongoDB Atlas connectivity status, database name, and record statistics. |
+| `POST` | `/api/db-reconnect` | Triggers immediate reconnection test to MongoDB Atlas. |
+
+---
+
+## 📊 ML Model Metrics Summary
+
+| Model | Accuracy | Precision | Recall | F1-Score | **ROC-AUC** | **Gini Coeff** | **KS Stat** |
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
 | **Logistic Regression** | 65.7% | 25.89% | **66.67%** | **0.3729** | **0.7218** | **0.4437** | **0.3352** |
 | **Gradient Boosting** | 68.2% | 23.81% | 49.02% | 0.3205 | 0.6507 | 0.3014 | 0.2292 |
 | **Random Forest** | 80.1% | 29.09% | 20.92% | 0.2433 | 0.6376 | 0.2752 | 0.2324 |
-
----
-
-## 🚀 Getting Started
-
-### Prerequisites
-
-- Python 3.8+
-- Required Packages:
-  ```bash
-  pip install numpy pandas scikit-learn matplotlib seaborn flask joblib
-  ```
-
-### Running the Web Application
-
-To launch the interactive Credit Scoring Dashboard UI:
-
-```bash
-python app.py
-```
-
-Then navigate to **`http://127.0.0.1:5000`** in your browser.
-
----
-
-## 💻 Running the ML Pipeline Step-by-Step
-
-If you wish to re-run the pipeline steps from scratch:
-
-```bash
-python 01_dataset_loader.py
-python 02_preprocessing.py
-python 03_model_training.py
-python 04_model_evaluation.py
-python 05_model_explainability.py
-python app.py
-```

@@ -3,56 +3,126 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Credit Risk Scoring System - AI Assessment Engine</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <title>Credit Risk Scoring System - Full Stack MongoDB Atlas Engine</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-dark: #0f172a;
-            --card-bg: rgba(30, 41, 59, 0.7);
-            --border-color: rgba(255, 255, 255, 0.1);
+            --bg-dark: #090d16;
+            --card-bg: rgba(22, 30, 46, 0.75);
+            --border-color: rgba(255, 255, 255, 0.08);
+            --border-hover: rgba(56, 189, 248, 0.3);
             --text-primary: #f8fafc;
             --text-secondary: #94a3b8;
             --accent-blue: #38bdf8;
             --accent-purple: #818cf8;
+            --accent-cyan: #06b6d4;
             --success: #34d399;
             --warning: #fbbf24;
             --danger: #f87171;
+            --atlas-green: #10b981;
         }
 
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            font-family: 'Inter', sans-serif;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
         }
 
         body {
             background-color: var(--bg-dark);
             color: var(--text-primary);
             min-height: 100vh;
-            padding: 2rem;
+            padding: 1.5rem;
             background-image: 
-                radial-gradient(at 0% 0%, rgba(56, 189, 248, 0.15) 0px, transparent 50%),
-                radial-gradient(at 100% 100%, rgba(129, 140, 248, 0.15) 0px, transparent 50%);
+                radial-gradient(at 0% 0%, rgba(56, 189, 248, 0.12) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(129, 140, 248, 0.12) 0px, transparent 50%),
+                radial-gradient(at 50% 50%, rgba(16, 185, 129, 0.05) 0px, transparent 60%);
         }
 
         .container {
-            max-width: 1200px;
+            max-width: 1280px;
             margin: 0 auto;
         }
 
+        /* DB Status Bar Header */
+        .top-db-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--border-color);
+            border-radius: 0.75rem;
+            padding: 0.75rem 1.25rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .db-status-pill {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background-color: var(--warning);
+            box-shadow: 0 0 10px var(--warning);
+        }
+
+        .status-dot.online {
+            background-color: var(--atlas-green);
+            box-shadow: 0 0 10px var(--atlas-green);
+        }
+
+        .db-meta-badge {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-color);
+            padding: 0.35rem 0.75rem;
+            border-radius: 2rem;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        .db-meta-badge strong {
+            color: var(--accent-blue);
+        }
+
+        .btn-reconnect {
+            background: transparent;
+            border: 1px solid var(--accent-blue);
+            color: var(--accent-blue);
+            padding: 0.35rem 0.85rem;
+            border-radius: 0.5rem;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-reconnect:hover {
+            background: rgba(56, 189, 248, 0.15);
+        }
+
         header {
-            margin-bottom: 2.5rem;
+            margin-bottom: 2rem;
             text-align: center;
         }
 
         header h1 {
-            font-size: 2.2rem;
-            font-weight: 700;
-            background: linear-gradient(135deg, #38bdf8, #818cf8);
+            font-size: 2.3rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple), var(--accent-cyan));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            margin-bottom: 0.5rem;
+            margin-bottom: 0.4rem;
+            letter-spacing: -0.5px;
         }
 
         header p {
@@ -60,13 +130,65 @@
             font-size: 1rem;
         }
 
+        /* Navigation Tabs */
+        .nav-tabs {
+            display: flex;
+            gap: 0.75rem;
+            margin-bottom: 1.75rem;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 0.75rem;
+        }
+
+        .tab-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            padding: 0.75rem 1.4rem;
+            border-radius: 0.5rem;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.2s ease;
+        }
+
+        .tab-btn:hover {
+            color: var(--text-primary);
+            background: rgba(255, 255, 255, 0.04);
+        }
+
+        .tab-btn.active {
+            color: var(--text-primary);
+            background: linear-gradient(135deg, rgba(56, 189, 248, 0.2), rgba(129, 140, 248, 0.2));
+            border: 1px solid var(--accent-blue);
+        }
+
+        .tab-badge {
+            background: rgba(56, 189, 248, 0.2);
+            color: var(--accent-blue);
+            padding: 0.15rem 0.5rem;
+            border-radius: 1rem;
+            font-size: 0.75rem;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Assessment Layout Grid */
         .dashboard-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 2rem;
         }
 
-        @media (max-width: 900px) {
+        @media (max-width: 950px) {
             .dashboard-grid {
                 grid-template-columns: 1fr;
             }
@@ -74,11 +196,12 @@
 
         .card {
             background: var(--card-bg);
-            backdrop-filter: blur(12px);
+            backdrop-filter: blur(16px);
             border: 1px solid var(--border-color);
             border-radius: 1rem;
             padding: 2rem;
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 20px 30px -10px rgba(0, 0, 0, 0.5);
+            transition: border-color 0.2s;
         }
 
         .card-header {
@@ -91,8 +214,8 @@
         }
 
         .card-header h2 {
-            font-size: 1.25rem;
-            font-weight: 600;
+            font-size: 1.3rem;
+            font-weight: 700;
             color: var(--text-primary);
         }
 
@@ -102,10 +225,10 @@
 
         .form-group label {
             display: block;
-            font-size: 0.875rem;
+            font-size: 0.85rem;
             font-weight: 500;
             color: var(--text-secondary);
-            margin-bottom: 0.5rem;
+            margin-bottom: 0.4rem;
         }
 
         .input-row {
@@ -117,39 +240,42 @@
         input, select {
             width: 100%;
             padding: 0.75rem 1rem;
-            background: rgba(15, 23, 42, 0.6);
+            background: rgba(9, 13, 22, 0.7);
             border: 1px solid var(--border-color);
             border-radius: 0.5rem;
             color: var(--text-primary);
             font-size: 0.95rem;
-            transition: border-color 0.2s;
+            transition: border-color 0.2s, box-shadow 0.2s;
         }
 
         input:focus, select:focus {
             outline: none;
             border-color: var(--accent-blue);
+            box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.15);
         }
 
         .btn-submit {
             width: 100%;
-            padding: 0.9rem;
+            padding: 1rem;
             margin-top: 1rem;
             background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
             color: #fff;
             border: none;
-            border-radius: 0.5rem;
-            font-size: 1rem;
-            font-weight: 600;
+            border-radius: 0.6rem;
+            font-size: 1.05rem;
+            font-weight: 700;
             cursor: pointer;
-            transition: transform 0.1s, opacity 0.2s;
+            box-shadow: 0 4px 15px rgba(56, 189, 248, 0.3);
+            transition: transform 0.15s, opacity 0.2s, box-shadow 0.2s;
         }
 
         .btn-submit:hover {
             opacity: 0.95;
-            transform: translateY(-1px);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(56, 189, 248, 0.4);
         }
 
-        /* Result Panel */
+        /* FICO Score Circle */
         .score-circle-container {
             display: flex;
             flex-direction: column;
@@ -159,22 +285,22 @@
         }
 
         .score-circle {
-            width: 180px;
-            height: 180px;
+            width: 190px;
+            height: 190px;
             border-radius: 50%;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             border: 6px solid var(--accent-blue);
-            background: rgba(15, 23, 42, 0.8);
-            box-shadow: 0 0 30px rgba(56, 189, 248, 0.2);
-            transition: all 0.3s ease;
+            background: rgba(9, 13, 22, 0.85);
+            box-shadow: 0 0 35px rgba(56, 189, 248, 0.25);
+            transition: all 0.4s ease;
         }
 
         .score-value {
-            font-size: 2.8rem;
-            font-weight: 700;
+            font-size: 3rem;
+            font-weight: 800;
             color: var(--text-primary);
         }
 
@@ -183,14 +309,15 @@
             color: var(--text-secondary);
             text-transform: uppercase;
             letter-spacing: 1px;
+            margin-top: -0.2rem;
         }
 
         .decision-badge {
             margin-top: 1.5rem;
-            padding: 0.6rem 1.5rem;
+            padding: 0.65rem 1.75rem;
             border-radius: 2rem;
             font-weight: 700;
-            font-size: 1rem;
+            font-size: 0.95rem;
             letter-spacing: 0.5px;
             text-transform: uppercase;
         }
@@ -198,6 +325,19 @@
         .badge-approved { background: rgba(52, 211, 153, 0.15); color: var(--success); border: 1px solid var(--success); }
         .badge-review { background: rgba(251, 191, 36, 0.15); color: var(--warning); border: 1px solid var(--warning); }
         .badge-declined { background: rgba(248, 113, 113, 0.15); color: var(--danger); border: 1px solid var(--danger); }
+
+        .db-saved-toast {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.8rem;
+            color: var(--atlas-green);
+            margin-top: 0.75rem;
+            background: rgba(16, 185, 129, 0.1);
+            padding: 0.4rem 0.8rem;
+            border-radius: 0.4rem;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
 
         .metrics-grid {
             display: grid;
@@ -207,128 +347,353 @@
         }
 
         .metric-box {
-            background: rgba(15, 23, 42, 0.5);
+            background: rgba(9, 13, 22, 0.5);
             padding: 1rem;
-            border-radius: 0.5rem;
+            border-radius: 0.6rem;
             border: 1px solid var(--border-color);
             text-align: center;
         }
 
         .metric-box p {
-            font-size: 0.8rem;
+            font-size: 0.78rem;
             color: var(--text-secondary);
         }
 
         .metric-box h3 {
-            font-size: 1.2rem;
-            font-weight: 600;
+            font-size: 1.25rem;
+            font-weight: 700;
             margin-top: 0.25rem;
+        }
+
+        /* History Table Styling */
+        .history-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.25rem;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .search-box {
+            position: relative;
+            flex: 1;
+            min-width: 240px;
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+            border: 1px solid var(--border-color);
+            border-radius: 0.75rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            font-size: 0.9rem;
+        }
+
+        th {
+            background: rgba(15, 23, 42, 0.9);
+            padding: 0.9rem 1rem;
+            color: var(--text-secondary);
+            font-weight: 600;
+            font-size: 0.82rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border-color);
+            color: var(--text-primary);
+
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover td {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .btn-delete {
+            background: rgba(248, 113, 113, 0.15);
+            border: 1px solid var(--danger);
+            color: var(--danger);
+            padding: 0.35rem 0.75rem;
+            border-radius: 0.4rem;
+            cursor: pointer;
+            font-size: 0.8rem;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .btn-delete:hover {
+            background: var(--danger);
+            color: #fff;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem 1rem;
+            color: var(--text-secondary);
+        }
+
+        .empty-state h4 {
+            font-size: 1.1rem;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .pill-tag {
+            padding: 0.25rem 0.6rem;
+            border-radius: 1rem;
+            font-size: 0.75rem;
+            font-weight: 600;
         }
     </style>
 </head>
 <body>
     <div class="container">
+        <!-- MongoDB Atlas Live Status Bar -->
+        <div class="top-db-bar">
+            <div class="db-status-pill">
+                <span class="status-dot" id="db_dot"></span>
+                <span id="db_status_text">Connecting to Database...</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 0.75rem;">
+                <div class="db-meta-badge">Database: <strong id="db_name_text">credit_scoring_db</strong></div>
+                <div class="db-meta-badge">Stored Assessments: <strong id="db_count_text">0</strong></div>
+                <button class="btn-reconnect" onclick="fetchDbStatus(true)">Refresh Atlas</button>
+            </div>
+        </div>
+
+        <!-- Header -->
         <header>
-            <h1>Credit Risk Scoring System</h1>
-            <p>Production ML Engine for Instant Credit Risk Assessment</p>
+            <h1>Credit Risk Assessment System</h1>
+            <p>Full-Stack Production Engine Powered by Machine Learning & MongoDB Atlas</p>
         </header>
 
-        <div class="dashboard-grid">
-            <!-- Form Card -->
+        <!-- Navigation Tabs -->
+        <div class="nav-tabs">
+            <button class="tab-btn active" id="tab_assess_btn" onclick="switchTab('assess')">
+                <span>⚡ Risk Assessment Engine</span>
+            </button>
+            <button class="tab-btn" id="tab_history_btn" onclick="switchTab('history')">
+                <span>🗄️ MongoDB Atlas History</span>
+                <span class="tab-badge" id="history_tab_badge">0</span>
+            </button>
+        </div>
+
+        <!-- TAB 1: ASSESSMENT ENGINE -->
+        <div class="tab-content active" id="tab_assess">
+            <div class="dashboard-grid">
+                <!-- Applicant Form Card -->
+                <div class="card">
+                    <div class="card-header">
+                        <h2>Applicant Financial Profile</h2>
+                        <select id="model_select" style="width: 210px;">
+                            <option value="logistic_regression">Logistic Regression</option>
+                            <option value="random_forest">Random Forest</option>
+                            <option value="gradient_boosting">Gradient Boosting</option>
+                        </select>
+                    </div>
+
+                    <form id="credit_form">
+                        <div class="input-row">
+                            <div class="form-group">
+                                <label>Applicant Age (years)</label>
+                                <input type="number" id="age" value="35" min="18" max="100" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Employment Duration (years)</label>
+                                <input type="number" id="employment_years" value="6.5" step="0.1" min="0" required>
+                            </div>
+                        </div>
+
+                        <div class="input-row">
+                            <div class="form-group">
+                                <label>Annual Income ($)</label>
+                                <input type="number" id="annual_income" value="65000" step="500" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Total Credit Limit ($)</label>
+                                <input type="number" id="credit_limit" value="20000" step="500" required>
+                            </div>
+                        </div>
+
+                        <div class="input-row">
+                            <div class="form-group">
+                                <label>Current Card Balance ($)</label>
+                                <input type="number" id="current_balance" value="3500" step="100" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Total Debt Load ($)</label>
+                                <input type="number" id="total_debt" value="45000" step="500" required>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Late Payments in Last 12 Months</label>
+                            <input type="number" id="num_late_payments_12m" value="0" min="0" max="15" required>
+                        </div>
+
+                        <button type="submit" class="btn-submit">Compute Credit Score & Save to Atlas</button>
+                    </form>
+                </div>
+
+                <!-- Result Card -->
+                <div class="card" id="results_card">
+                    <div class="card-header">
+                        <h2>Credit Evaluation & Decision</h2>
+                        <span id="selected_model_badge" style="font-size: 0.85rem; color: var(--accent-blue);">Model: Logistic Regression</span>
+                    </div>
+
+                    <div class="score-circle-container">
+                        <div class="score-circle" id="score_border">
+                            <div class="score-value" id="score_text">742</div>
+                            <div class="score-label">FICO Scale</div>
+                        </div>
+                        <div class="decision-badge badge-approved" id="decision_badge">APPROVED</div>
+                        
+                        <div class="db-saved-toast" id="db_saved_toast">
+                            <span>☁️ Persisted into MongoDB Atlas</span>
+                        </div>
+                    </div>
+
+                    <div class="metrics-grid">
+                        <div class="metric-box">
+                            <p>Probability of Default</p>
+                            <h3 id="prob_text">4.2%</h3>
+                        </div>
+                        <div class="metric-box">
+                            <p>Risk Classification</p>
+                            <h3 id="risk_text">Low Risk</h3>
+                        </div>
+                        <div class="metric-box">
+                            <p>Revolving Utilization</p>
+                            <h3 id="util_text">17.5%</h3>
+                        </div>
+                        <div class="metric-box">
+                            <p>Debt-to-Income (DTI)</p>
+                            <h3 id="dti_text">69.2%</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 2: MONGODB ATLAS HISTORY -->
+        <div class="tab-content" id="tab_history">
             <div class="card">
                 <div class="card-header">
-                    <h2>Applicant Information</h2>
-                    <select id="model_select" style="width: 200px;">
-                        <option value="logistic_regression">Logistic Regression</option>
-                        <option value="random_forest">Random Forest</option>
-                        <option value="gradient_boosting">Gradient Boosting</option>
-                    </select>
+                    <h2>MongoDB Atlas Assessment Records</h2>
+                    <button class="btn-reconnect" onclick="loadHistory()">🔄 Sync Records</button>
                 </div>
 
-                <form id="credit_form">
-                    <div class="input-row">
-                        <div class="form-group">
-                            <label>Age (years)</label>
-                            <input type="number" id="age" value="35" min="18" max="100" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Employment (years)</label>
-                            <input type="number" id="employment_years" value="6.5" step="0.1" min="0" required>
-                        </div>
+                <div class="history-controls">
+                    <div class="search-box">
+                        <input type="text" id="history_search" placeholder="Search by model or risk level..." oninput="filterHistory()">
                     </div>
-
-                    <div class="input-row">
-                        <div class="form-group">
-                            <label>Annual Income ($)</label>
-                            <input type="number" id="annual_income" value="65000" step="500" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Credit Limit ($)</label>
-                            <input type="number" id="credit_limit" value="20000" step="500" required>
-                        </div>
+                    <div style="display: flex; gap: 0.5rem;">
+                        <select id="risk_filter_select" onchange="loadHistory()" style="width: 180px;">
+                            <option value="">All Risk Bands</option>
+                            <option value="Low Risk">Low Risk</option>
+                            <option value="Medium Risk">Medium Risk</option>
+                            <option value="High Risk">High Risk</option>
+                        </select>
                     </div>
-
-                    <div class="input-row">
-                        <div class="form-group">
-                            <label>Current Balance ($)</label>
-                            <input type="number" id="current_balance" value="3500" step="100" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Total Debt ($)</label>
-                            <input type="number" id="total_debt" value="45000" step="500" required>
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label>Late Payments in Last 12 Months</label>
-                        <input type="number" id="num_late_payments_12m" value="0" min="0" max="15" required>
-                    </div>
-
-                    <button type="submit" class="btn-submit">Assess Credit Risk Score</button>
-                </form>
-            </div>
-
-            <!-- Results Card -->
-            <div class="card" id="results_card">
-                <div class="card-header">
-                    <h2>Credit Score & Decision</h2>
-                    <span id="selected_model_badge" style="font-size: 0.85rem; color: var(--accent-blue);">Model: Logistic Regression</span>
                 </div>
 
-                <div class="score-circle-container">
-                    <div class="score-circle" id="score_border">
-                        <div class="score-value" id="score_text">742</div>
-                        <div class="score-label">FICO Scale</div>
-                    </div>
-                    <div class="decision-badge badge-approved" id="decision_badge">APPROVED</div>
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Timestamp</th>
+                                <th>Credit Score</th>
+                                <th>Decision</th>
+                                <th>Risk Band</th>
+                                <th>Default Prob</th>
+                                <th>Model Used</th>
+                                <th>Income / Debt</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="history_table_body">
+                            <!-- Injected dynamically -->
+                        </tbody>
+                    </table>
                 </div>
-
-                <div class="metrics-grid">
-                    <div class="metric-box">
-                        <p>Probability of Default</p>
-                        <h3 id="prob_text">4.2%</h3>
-                    </div>
-                    <div class="metric-box">
-                        <p>Risk Classification</p>
-                        <h3 id="risk_text">Low Risk</h3>
-                    </div>
-                    <div class="metric-box">
-                        <p>Credit Utilization</p>
-                        <h3 id="util_text">17.5%</h3>
-                    </div>
-                    <div class="metric-box">
-                        <p>Debt-to-Income (DTI)</p>
-                        <h3 id="dti_text">69.2%</h3>
-                    </div>
+                
+                <div id="history_empty_state" class="empty-state" style="display: none;">
+                    <h4>No Assessments Found in MongoDB</h4>
+                    <p>Run a credit evaluation on the Risk Assessment tab to store records in MongoDB Atlas.</p>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
+        let allHistoryRecords = [];
+
+        // Tab Switch Logic
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+
+            if (tabName === 'assess') {
+                document.getElementById('tab_assess_btn').classList.add('active');
+                document.getElementById('tab_assess').classList.add('active');
+            } else {
+                document.getElementById('tab_history_btn').classList.add('active');
+                document.getElementById('tab_history').classList.add('active');
+                loadHistory();
+            }
+        }
+
+        // Fetch DB Diagnostics
+        async function fetchDbStatus(forceReconnect = false) {
+            try {
+                const endpoint = forceReconnect ? '/api/db-reconnect' : '/api/db-status';
+                const method = forceReconnect ? 'POST' : 'GET';
+                const res = await fetch(endpoint, { method });
+                const status = await res.json();
+
+                const dot = document.getElementById('db_dot');
+                const statusText = document.getElementById('db_status_text');
+                const countText = document.getElementById('db_count_text');
+                const nameText = document.getElementById('db_name_text');
+                const historyBadge = document.getElementById('history_tab_badge');
+
+                const data = status.status || status;
+                countText.innerText = data.total_records || 0;
+                historyBadge.innerText = data.total_records || 0;
+                nameText.innerText = data.database_name || 'credit_scoring_db';
+
+                if (data.is_connected) {
+                    dot.className = 'status-dot online';
+                    statusText.innerText = data.is_atlas ? '⚡ Connected to MongoDB Atlas Cloud' : '🟢 Connected to Local MongoDB';
+                } else {
+                    dot.className = 'status-dot';
+                    statusText.innerText = '🟡 In-Memory Fallback Mode (Atlas Unreachable)';
+                }
+            } catch (err) {
+                console.warn("DB Status check error:", err);
+            }
+        }
+
+        // Submit Form & Run ML Model Assessment
         document.getElementById('credit_form').addEventListener('submit', async function(e) {
             e.preventDefault();
             
+            const submitBtn = document.querySelector('.btn-submit');
+            submitBtn.innerText = "Processing ML & Persisting to MongoDB...";
+            submitBtn.disabled = true;
+
             const data = {
                 model_name: document.getElementById('model_select').value,
                 age: parseFloat(document.getElementById('age').value),
@@ -348,7 +713,12 @@
                 });
                 const res = await response.json();
 
-                // Update UI
+                if (res.error) {
+                    alert('Prediction Error: ' + res.error);
+                    return;
+                }
+
+                // Update UI Score & Metrics
                 document.getElementById('score_text').innerText = res.credit_score;
                 document.getElementById('prob_text').innerText = (res.probability_default * 100).toFixed(1) + '%';
                 document.getElementById('risk_text').innerText = res.risk_band;
@@ -363,20 +733,122 @@
                     badge.classList.add('badge-approved');
                     badge.innerText = 'APPROVED (LOW RISK)';
                     scoreCircle.style.borderColor = 'var(--success)';
+                    scoreCircle.style.boxShadow = '0 0 35px rgba(52, 211, 153, 0.3)';
                 } else if (res.decision === 'MANUAL REVIEW') {
                     badge.classList.add('badge-review');
                     badge.innerText = 'MANUAL REVIEW';
                     scoreCircle.style.borderColor = 'var(--warning)';
+                    scoreCircle.style.boxShadow = '0 0 35px rgba(251, 191, 36, 0.3)';
                 } else {
                     badge.classList.add('badge-declined');
                     badge.innerText = 'DECLINED (HIGH RISK)';
                     scoreCircle.style.borderColor = 'var(--danger)';
+                    scoreCircle.style.boxShadow = '0 0 35px rgba(248, 113, 113, 0.3)';
                 }
 
                 document.getElementById('selected_model_badge').innerText = 'Model: ' + res.model_used;
+
+                // Update DB Status counter
+                fetchDbStatus();
             } catch (err) {
                 alert('Error running risk prediction: ' + err);
+            } finally {
+                submitBtn.innerText = "Compute Credit Score & Save to Atlas";
+                submitBtn.disabled = false;
             }
+        });
+
+        // Load History from MongoDB
+        async function loadHistory() {
+            try {
+                const filter = document.getElementById('risk_filter_select').value;
+                const url = filter ? `/api/assessments?risk_band=${encodeURIComponent(filter)}` : '/api/assessments';
+                const response = await fetch(url);
+                const result = await response.json();
+
+                if (result.success) {
+                    allHistoryRecords = result.assessments;
+                    renderHistoryTable(allHistoryRecords);
+                }
+            } catch (err) {
+                console.error("Failed to load history:", err);
+            }
+        }
+
+        // Render Table Rows
+        function renderHistoryTable(records) {
+            const tbody = document.getElementById('history_table_body');
+            const emptyState = document.getElementById('history_empty_state');
+            tbody.innerHTML = '';
+
+            if (!records || records.length === 0) {
+                emptyState.style.display = 'block';
+                return;
+            } else {
+                emptyState.style.display = 'none';
+            }
+
+            records.forEach(rec => {
+                const tr = document.createElement('tr');
+                
+                const timeStr = rec.created_at ? new Date(rec.created_at).toLocaleString() : 'Just now';
+                
+                let badgeClass = 'badge-approved';
+                if (rec.decision === 'MANUAL REVIEW') badgeClass = 'badge-review';
+                if (rec.decision === 'DECLINED') badgeClass = 'badge-declined';
+
+                const incomeStr = rec.applicant_inputs ? `$${rec.applicant_inputs.annual_income.toLocaleString()} / $${rec.applicant_inputs.total_debt.toLocaleString()}` : 'N/A';
+
+                tr.innerHTML = `
+                    <td style="font-size: 0.8rem; color: var(--text-secondary);">${timeStr}</td>
+                    <td><strong style="font-size: 1.1rem; color: var(--accent-blue);">${rec.credit_score}</strong></td>
+                    <td><span class="pill-tag ${badgeClass}">${rec.decision}</span></td>
+                    <td>${rec.risk_band}</td>
+                    <td>${(rec.probability_default * 100).toFixed(1)}%</td>
+                    <td style="color: var(--text-secondary);">${rec.model_used || 'Logistic Regression'}</td>
+                    <td style="font-size: 0.8rem; color: var(--text-secondary);">${incomeStr}</td>
+                    <td>
+                        <button class="btn-delete" onclick="deleteRecord('${rec._id}')">Delete</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // Filter Table on Search Input
+        function filterHistory() {
+            const query = document.getElementById('history_search').value.toLowerCase();
+            const filtered = allHistoryRecords.filter(rec => {
+                const modelMatch = (rec.model_used || '').toLowerCase().includes(query);
+                const riskMatch = (rec.risk_band || '').toLowerCase().includes(query);
+                const decisionMatch = (rec.decision || '').toLowerCase().includes(query);
+                return modelMatch || riskMatch || decisionMatch;
+            });
+            renderHistoryTable(filtered);
+        }
+
+        // Delete Record Action
+        async function deleteRecord(recordId) {
+            if (!confirm('Are you sure you want to delete this credit assessment record from MongoDB?')) return;
+
+            try {
+                const res = await fetch(`/api/assessments/${recordId}`, { method: 'DELETE' });
+                const result = await res.json();
+                if (result.success) {
+                    allHistoryRecords = allHistoryRecords.filter(r => r._id !== recordId);
+                    renderHistoryTable(allHistoryRecords);
+                    fetchDbStatus();
+                } else {
+                    alert('Delete failed: ' + result.error);
+                }
+            } catch (err) {
+                alert('Error deleting record: ' + err);
+            }
+        }
+
+        // Init on page load
+        window.addEventListener('DOMContentLoaded', () => {
+            fetchDbStatus();
         });
     </script>
 </body>
